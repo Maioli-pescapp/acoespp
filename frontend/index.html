@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Açõespp - Análise Fundamentalista</title>
+    <link rel="stylesheet" href="css/estilos.css">
+    <!-- Para PWA como PescApp -->
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#2E5AAC">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    
+</head>
+<body>
+    <header>
+        <h1>📈 Açõespp</h1>
+        <p>Análise fundamentalista de ações da B3</p>
+    </header>
+
+    <main>
+        <!-- SEÇÃO DE TESTE SIMPLES -->
+        <section style="background: #f5f7fa; padding: 20px; border-radius: 10px; margin-bottom: 20px;">
+            <h2>🔄 Teste de Conexão</h2>
+            <div onclick="testarConexao()" style="display: inline-block; padding: 12px 24px; background: #4CAF50; color: white; border-radius: 6px; cursor: pointer;">
+                Testar Servidor
+            </div>
+            <p id="resultado-teste" style="margin-top: 10px;"></p>
+        </section>
+
+        <!-- SEÇÃO DE ANÁLISE (SÓ DIVs, NADA MAIS) -->
+        <section style="margin-top: 30px;">
+            <h2>🔍 Análise Fundamentalista</h2>
+            
+            <input type="text" id="inputTicker" placeholder="Ex: PETR4.SA" value="PETR4.SA" 
+                   style="padding: 12px; width: 200px; border: 2px solid #2E5AAC; border-radius: 6px;">
+            
+            <br><br>
+            
+            <!-- DIV para busca de cotação -->
+            <div onclick="buscarCotacao()" 
+                 style="display: inline-block; padding: 12px 24px; background: #4CAF50; color: white; border-radius: 6px; cursor: pointer; margin-right: 10px;">
+                📊 Buscar Cotação
+            </div>
+            
+            <!-- DIV para análise fundamentalista -->
+            <div onclick="analisarAcao(event)" 
+                 style="display: inline-block; padding: 12px 24px; background: #2E5AAC; color: white; border-radius: 6px; cursor: pointer;">
+                🔍 Análise Fundamentalista
+            </div>
+            
+            <div id="resultado-cotacao" style="margin-top: 30px; min-height: 100px;"></div>
+        </section>
+    </main>
+
+    <footer style="margin-top: 50px; padding: 20px; text-align: center; color: #777; border-top: 1px solid #eee;">
+        <p>Açõespp - Sistema de análise fundamentalista</p>
+    </footer>
+
+    <!-- Script PRINCIPAL -->
+    <script src="js/app.js"></script>
+
+    <script>
+    if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.register('service-worker.js');
+    }
+    </script>
+    
+</body>
+</html>
