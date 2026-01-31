@@ -6,7 +6,9 @@
 // ============================================
 
 // URLs PÚBLICAS - Funciona no celular
-const API_BASE_URL = 'https://api.acoespp.com'; // Futuro deploy
+const API_BASE_URL = window.location.hostname.includes('github.io') 
+    ? ''  // Modo PWA offline no GitHub Pages
+    : 'http://localhost:3000';  // Modo desenvolvimento local
 
 // Dados MOCKADOS para desenvolvimento PWA
 async function buscarDadosMockados(ticker) {

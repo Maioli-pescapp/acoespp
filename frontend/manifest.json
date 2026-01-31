@@ -2,7 +2,7 @@
   "name": "Açõespp",
   "short_name": "Açõespp",
   "description": "Análise fundamentalista de ações da B3",
-  "start_url": "/acoespp/frontend/index.html",
+  "start_url": "/acoespp/",  // ← IMPORTANTE: sem "frontend/index.html"
   "display": "standalone",
   "background_color": "#ffffff",
   "theme_color": "#2E5AAC",
