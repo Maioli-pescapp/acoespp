@@ -112,44 +112,117 @@ async function buscarCotacao() {
     resultadoElemento.innerHTML = `<p>Buscando ${ticker}...</p>`;
 
     try {
-        const resposta = await fetch(`${API_BASE_URL}/cotacao/${ticker}`);
-        const dados = await resposta.json();
-
-        // Verifica se a resposta tem dados de cotação real
-        if (dados.cotacao && dados.cotacao.preco_atual) {
-            // Determina a cor com base na variação (verde para positivo, vermelho para negativo)
-            const corVariacao = dados.cotacao.variacao_percentual >= 0 ? 'green' : 'red';
-            const simboloVariacao = dados.cotacao.variacao_percentual >= 0 ? '▲' : '▼';
-
-            resultadoElemento.innerHTML = `
-                <div style="background: #f8f9fa; padding: 20px; border-radius: 10px; border-left: 5px solid #2E5AAC;">
-                    <h3 style="margin-top: 0; color: #2E5AAC;">${dados.nome} (${dados.ticker})</h3>
-                    <p><strong>Setor:</strong> ${dados.setor || 'Não informado'}</p>
-                    <hr>
-                    <div style="font-size: 1.8em; font-weight: bold;">
-                        R$ ${dados.cotacao.preco_atual.toFixed(2)}
-                        <span style="font-size: 0.7em; color: ${corVariacao}; margin-left: 10px;">
-                            ${simboloVariacao} ${Math.abs(dados.cotacao.variacao_percentual)}%
-                        </span>
-                    </div>
-                    <p><small>Variação: R$ ${dados.cotacao.variacao_reais} (${dados.cotacao.variacao_percentual}%)</small></p>
-                    <p><small>Fechamento anterior: R$ ${dados.cotacao.preco_anterior.toFixed(2)}</small></p>
-                    <p><small><em>Atualizado: ${dados.cotacao.atualizado_em}</em></small></p>
-                    <p style="color: #666; font-size: 0.9em; margin-top: 15px;">Fonte: ${dados.origem}</p>
-                </div>
-            `;
-        } else {
-            // Se a API não retornou preço (ex.: ticker inválido, fim de semana)
-            resultadoElemento.innerHTML = `
-                <p><strong>Ticker:</strong> ${dados.ticker}</p>
-                <p><strong>Status:</strong> <span style="color: orange;">${dados.mensagem}</span></p>
-                <p>Detalhe: ${dados.cotacao?.mensagem || 'Tente um ticker válido como PETR4.SA, VALE3.SA, ITUB4.SA'}</p>
-            `;
+        // NO GitHub Pages não temos backend, então usa dados mockados
+        if (window.location.hostname.includes('github.io') || !API_BASE_URL) {
+            // Modo PWA - dados mockados
+            await new Promise(resolve => setTimeout(resolve, 800));
+            
+            const dadosMockados = {
+                ticker: ticker,
+                nome: ticker === "PETR4.SA" ? "Petrobras" : 
+                      ticker === "VALE3.SA" ? "Vale S.A." : 
+                      ticker === "ITUB4.SA" ? "Itaú Unibanco" : "Empresa",
+                cotacao: {
+                    preco_atual: 37.50 + (Math.random() * 5 - 2.5),
+                    preco_anterior: 36.80,
+                    variacao_reais: (Math.random() * 2 - 1).toFixed(2),
+                    variacao_percentual: (Math.random() * 3 - 1.5).toFixed(2),
+                    moeda: "BRL",
+                    atualizado_em: new Date().toLocaleTimeString('pt-BR')
+                },
+                status: 'sucesso',
+                mensagem: 'Dados demonstrativos (modo PWA)'
+            };
+            
+            // Exibe os dados
+            exibirCotacao(dadosMockados);
+            return;
         }
+        
+        // Modo desenvolvimento com backend local
+        const resposta = await fetch(`${API_BASE_URL}/cotacao/${ticker}`);
+        if (!resposta.ok) throw new Error(`Erro HTTP: ${resposta.status}`);
+        
+        const dados = await resposta.json();
+        exibirCotacao(dados);
+        
     } catch (erro) {
-        resultadoElemento.innerHTML = `<p style="color: red;">❌ Erro na requisição: ${erro.message}</p>`;
         console.error("Erro na busca:", erro);
+        resultadoElemento.innerHTML = `
+            <div style="background: #ffebee; padding: 20px; border-radius: 10px; color: #c62828;">
+                <p><strong>⚠️ Modo PWA Offline</strong></p>
+                <p>Para cotações em tempo real, execute o backend localmente:</p>
+                <ol style="text-align: left; margin-left: 20px;">
+                    <li>Abra terminal na pasta "backend"</li>
+                    <li>Execute: <code>node server.js</code></li>
+                    <li>No PC, acesse: <code>http://localhost:3000</code></li>
+                </ol>
+                <p><em>Enquanto isso, usando dados demonstrativos...</em></p>
+                <button onclick="buscarCotacaoMock()" style="margin-top: 10px; padding: 10px 20px; background: #2E5AAC; color: white; border: none; border-radius: 5px; cursor: pointer;">
+                    Usar Dados Demonstrativos
+                </button>
+            </div>
+        `;
     }
+}
+
+// Função auxiliar para exibir cotação
+function exibirCotacao(dados) {
+    const resultadoElemento = document.getElementById('resultado-cotacao');
+    
+    if (dados.cotacao && dados.cotacao.preco_atual) {
+        const corVariacao = parseFloat(dados.cotacao.variacao_percentual) >= 0 ? '#4CAF50' : '#F44336';
+        const simboloVariacao = parseFloat(dados.cotacao.variacao_percentual) >= 0 ? '▲' : '▼';
+        
+        resultadoElemento.innerHTML = `
+            <div style="background: #f8f9fa; padding: 20px; border-radius: 10px; border-left: 5px solid #2E5AAC;">
+                <h3 style="margin-top: 0; color: #2E5AAC;">${dados.nome} (${dados.ticker})</h3>
+                <p><strong>Status:</strong> ${dados.mensagem}</p>
+                <hr>
+                <div style="font-size: 1.8em; font-weight: bold;">
+                    R$ ${dados.cotacao.preco_atual.toFixed(2)}
+                    <span style="font-size: 0.7em; color: ${corVariacao}; margin-left: 10px;">
+                        ${simboloVariacao} ${Math.abs(parseFloat(dados.cotacao.variacao_percentual)).toFixed(2)}%
+                    </span>
+                </div>
+                <p><small>Variação: R$ ${dados.cotacao.variacao_reais} (${dados.cotacao.variacao_percentual}%)</small></p>
+                <p><small><em>Atualizado: ${dados.cotacao.atualizado_em}</em></small></p>
+            </div>
+        `;
+    }
+}
+
+// Função para dados mockados
+async function buscarCotacaoMock() {
+    const ticker = document.getElementById('inputTicker').value.trim() || "PETR4.SA";
+    
+    // Dados realistas para empresas comuns
+    const empresas = {
+        "PETR4.SA": { nome: "Petrobras", base: 37.50 },
+        "VALE3.SA": { nome: "Vale S.A.", base: 68.90 },
+        "ITUB4.SA": { nome: "Itaú Unibanco", base: 32.15 },
+        "BBDC4.SA": { nome: "Bradesco", base: 14.80 },
+        "WEGE3.SA": { nome: "WEG S.A.", base: 36.20 }
+    };
+    
+    const empresa = empresas[ticker] || { nome: "Empresa Genérica", base: 50.00 };
+    
+    const dadosMockados = {
+        ticker: ticker,
+        nome: empresa.nome,
+        cotacao: {
+            preco_atual: empresa.base + (Math.random() * 5 - 2.5),
+            preco_anterior: empresa.base,
+            variacao_reais: (Math.random() * 2 - 1).toFixed(2),
+            variacao_percentual: (Math.random() * 3 - 1.5).toFixed(2),
+            moeda: "BRL",
+            atualizado_em: new Date().toLocaleTimeString('pt-BR')
+        },
+        status: 'sucesso',
+        mensagem: '📱 Dados demonstrativos (modo PWA)'
+    };
+    
+    exibirCotacao(dadosMockados);
 }
 
 async function analisarAcao(event) {
@@ -760,6 +833,101 @@ function analisarAcaoMock(ticker) {
     document.getElementById('inputTicker').value = ticker;
     analisarAcao({ preventDefault: () => {}, stopPropagation: () => {} });
 }
+
+// ============================================
+// SISTEMA DE INSTALAÇÃO PWA
+// ============================================
+
+let deferredPrompt;
+const installContainer = document.getElementById('installButtonContainer');
+const iosInstructions = document.getElementById('iosInstructions');
+
+// Detecta quando pode instalar
+window.addEventListener('beforeinstallprompt', (e) => {
+    console.log('📱 PWA: beforeinstallprompt disparado');
+    
+    e.preventDefault();
+    deferredPrompt = e;
+    
+    // Mostra botão para Android
+    if (installContainer) {
+        installContainer.style.display = 'block';
+        
+        // Esconde instruções iOS se for Android
+        if (!/iPad|iPhone|iPod/.test(navigator.userAgent)) {
+            iosInstructions.style.display = 'none';
+        }
+    }
+});
+
+// Função de instalação
+function instalarPWA() {
+    if (deferredPrompt) {
+        // Android - prompt nativo
+        deferredPrompt.prompt();
+        deferredPrompt.userChoice.then((choiceResult) => {
+            if (choiceResult.outcome === 'accepted') {
+                mostrarToast('🎉 Açõespp instalado!');
+                if (installContainer) installContainer.style.display = 'none';
+            }
+            deferredPrompt = null;
+        });
+    } else {
+        // iOS ou outro - mostra instruções
+        mostrarToast('📱 Use o menu do navegador para instalar');
+        if (iosInstructions) iosInstructions.style.display = 'block';
+    }
+}
+
+// Detecta se já está instalado
+if (window.matchMedia('(display-mode: standalone)').matches || 
+    window.navigator.standalone) {
+    console.log('✅ Já rodando como PWA instalado');
+    if (installContainer) installContainer.style.display = 'none';
+}
+
+// Detecta iOS
+const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+if (isIOS && installContainer) {
+    // iOS não tem beforeinstallprompt, mostra manualmente
+    setTimeout(() => {
+        installContainer.style.display = 'block';
+        if (iosInstructions) iosInstructions.style.display = 'block';
+    }, 2000);
+}
+
+// Função auxiliar
+function mostrarToast(mensagem) {
+    const toast = document.createElement('div');
+    toast.textContent = mensagem;
+    toast.style.cssText = `
+        position: fixed;
+        bottom: 20px;
+        left: 50%;
+        transform: translateX(-50%);
+        background: linear-gradient(135deg, #4CAF50, #2E5AAC);
+        color: white;
+        padding: 15px 25px;
+        border-radius: 12px;
+        z-index: 1000;
+        font-weight: bold;
+        box-shadow: 0 5px 20px rgba(0,0,0,0.2);
+    `;
+    
+    document.body.appendChild(toast);
+    setTimeout(() => toast.remove(), 3000);
+}
+
+// Verifica ao carregar se pode mostrar botão
+setTimeout(() => {
+    if (installContainer && installContainer.style.display === 'none') {
+        // Se ainda não mostrou, verifica se é iOS
+        if (isIOS) {
+            installContainer.style.display = 'block';
+            if (iosInstructions) iosInstructions.style.display = 'block';
+        }
+    }
+}, 3000);
 
 // (Opcional) Pode testar a conexão automaticamente ao carregar a página
 // window.onload = testarConexao;

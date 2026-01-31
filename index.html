@@ -17,6 +17,51 @@
         <p>Análise fundamentalista de ações da B3</p>
     </header>
 
+    <!-- BOTÃO DE INSTALAÇÃO PWA -->
+    <div id="installButtonContainer" style="
+        display: none;
+        text-align: center;
+        margin: 20px 0;
+        padding: 15px;
+        background: linear-gradient(135deg, #9C27B0, #673AB7);
+        border-radius: 15px;
+        color: white;
+    ">
+        <div style="font-size: 1.5em; margin-bottom: 10px;">📱</div>
+        <div style="font-weight: bold; font-size: 1.2em; margin-bottom: 10px;">
+            Instalar Açõespp no Celular
+        </div>
+        <div style="margin-bottom: 15px;">
+            Tenha acesso rápido direto da sua tela inicial
+        </div>
+        <div onclick="instalarPWA()" style="
+            background: white;
+            color: #673AB7;
+            padding: 12px 25px;
+            border-radius: 50px;
+            font-weight: bold;
+            display: inline-block;
+            cursor: pointer;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+        ">
+            📥 Instalar Agora
+        </div>
+        <div id="iosInstructions" style="
+            display: none;
+            margin-top: 15px;
+            padding: 15px;
+            background: rgba(255,255,255,0.2);
+            border-radius: 10px;
+            text-align: left;
+            font-size: 0.9em;
+        ">
+            <strong>Para iPhone/iPad:</strong><br>
+            1. Toque em <span style="font-weight: bold;">📤 Compartilhar</span><br>
+            2. Role e toque em <span style="font-weight: bold;">"Adicionar à Tela de Início"</span><br>
+            3. Toque em <span style="font-weight: bold;">"Adicionar"</span>
+        </div>
+    </div>
+
     <main>
         <!-- SEÇÃO DE TESTE SIMPLES -->
         <section style="background: #f5f7fa; padding: 20px; border-radius: 10px; margin-bottom: 20px;">
