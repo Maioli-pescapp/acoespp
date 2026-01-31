@@ -43,20 +43,57 @@ async function buscarDadosMockados(ticker) {
     };
 }
 
-// 1. Função para testar a conexão com o back-end
 async function testarConexao() {
     const resultadoElemento = document.getElementById('resultado-teste');
-    resultadoElemento.textContent = "Testando conexão...";
+    resultadoElemento.textContent = "Testando modo PWA...";
+    resultadoElemento.style.color = '#666';
 
     try {
-        const resposta = await fetch(`${API_BASE_URL}/teste`);
-        const dados = await resposta.json();
-        resultadoElemento.textContent = `✅ Sucesso: ${dados.mensagem}`;
-        resultadoElemento.style.color = 'green';
+        // Simula delay de rede
+        await new Promise(resolve => setTimeout(resolve, 800));
+        
+        // Verifica se é PWA
+        const isPWA = window.matchMedia('(display-mode: standalone)').matches || 
+                     window.navigator.standalone ||
+                     document.referrer.includes('android-app://');
+        
+        resultadoElemento.innerHTML = `
+            <div style="
+                background: linear-gradient(135deg, #4CAF50, #2E5AAC);
+                color: white;
+                padding: 20px;
+                border-radius: 12px;
+                margin-top: 10px;
+                text-align: center;
+            ">
+                <div style="font-size: 2em; margin-bottom: 10px;">✅</div>
+                <div style="font-weight: 600; margin-bottom: 5px;">MODO PWA ATIVO</div>
+                <div style="font-size: 0.9em; opacity: 0.9;">
+                    ${isPWA ? '📱 Aplicativo instalado' : '🌐 Navegador web'}
+                </div>
+                <div style="font-size: 0.85em; margin-top: 10px;">
+                    Funcionando offline com dados demonstrativos
+                </div>
+            </div>
+        `;
+        
     } catch (erro) {
-        resultadoElemento.textContent = `❌ Falha na conexão: ${erro.message}`;
-        resultadoElemento.style.color = 'red';
-        console.error("Erro no teste:", erro);
+        resultadoElemento.innerHTML = `
+            <div style="
+                background: #ffebee;
+                color: #c62828;
+                padding: 15px;
+                border-radius: 10px;
+                margin-top: 10px;
+                text-align: center;
+            ">
+                <div style="font-size: 1.5em;">⚠️</div>
+                <div style="font-weight: 600;">MODO OFFLINE</div>
+                <div style="font-size: 0.9em;">
+                    Usando dados demonstrativos
+                </div>
+            </div>
+        `;
     }
 }
 
@@ -428,6 +465,298 @@ async function analisarAcao(event) {
     }
     
     return false;
+}
+
+// ============================================
+// SISTEMA DE RECOMENDAÇÕES (MOCK)
+// ============================================
+
+async function gerarRecomendacoes() {
+    console.log('🎯 Gerando recomendações...');
+    
+    // Empresas mockadas para demonstração
+    const empresasMock = [
+        {
+            ticker: "PETR4.SA",
+            nome: "Petrobras",
+            score: 78,
+            indicadores: { pl: 5.4, p_vp: 1.4, roe: 22.5, margem_liquida: 15.2 },
+            recomendacao: "COMPRAR",
+            motivo: "Valuation atrativo, setor em alta"
+        },
+        {
+            ticker: "VALE3.SA", 
+            nome: "Vale S.A.",
+            score: 72,
+            indicadores: { pl: 6.2, p_vp: 1.8, roe: 25.1, margem_liquida: 28.4 },
+            recomendacao: "COMPRAR",
+            motivo: "Alta margem, commodity valorizada"
+        },
+        {
+            ticker: "ITUB4.SA",
+            nome: "Itaú Unibanco",
+            score: 68,
+            indicadores: { pl: 9.1, p_vp: 1.2, roe: 18.7, margem_liquida: 22.3 },
+            recomendacao: "COMPRAR",
+            motivo: "Setor financeiro estável"
+        },
+        {
+            ticker: "BBDC4.SA",
+            nome: "Bradesco",
+            score: 42,
+            indicadores: { pl: 12.5, p_vp: 0.9, roe: 8.4, margem_liquida: 10.1 },
+            recomendacao: "VENDER",
+            motivo: "ROE em queda, margens comprimidas"
+        },
+        {
+            ticker: "WEGE3.SA",
+            nome: "WEG S.A.",
+            score: 85,
+            indicadores: { pl: 35.2, p_vp: 8.7, roe: 28.9, margem_liquida: 18.7 },
+            recomendacao: "MANTER",
+            motivo: "Excelente empresa, mas valuation alto"
+        },
+        {
+            ticker: "MGLU3.SA",
+            nome: "Magazine Luiza",
+            score: 35,
+            indicadores: { pl: -4.2, p_vp: 2.1, roe: -5.8, margem_liquida: -2.4 },
+            recomendacao: "VENDER",
+            motivo: "Prejuízo, endividamento alto"
+        }
+    ];
+    
+    // Separar recomendações
+    const comprar = empresasMock.filter(e => e.recomendacao === "COMPRAR").slice(0, 3);
+    const vender = empresasMock.filter(e => e.recomendacao === "VENDER").slice(0, 3);
+    
+    return { comprar, vender };
+}
+
+// Função para exibir recomendações
+async function mostrarRecomendacoes() {
+    const resultadoElemento = document.getElementById('resultado-cotacao');
+    
+    resultadoElemento.innerHTML = `
+        <div style="
+            background: #f8f9fa;
+            padding: 25px 20px;
+            border-radius: 20px;
+            margin: 25px 0;
+            text-align: center;
+        ">
+            <div style="font-size: 2em; color: #2E5AAC; margin-bottom: 15px;">🎯</div>
+            <div style="font-size: 1.3em; font-weight: 700; color: #2E5AAC; margin-bottom: 10px;">
+                Gerando Recomendações...
+            </div>
+            <div style="color: #666;">
+                Analisando todas as ações da B3
+            </div>
+        </div>
+    `;
+    
+    const { comprar, vender } = await gerarRecomendacoes();
+    
+    resultadoElemento.innerHTML = `
+        <div id="recomendacoes-pwa" style="margin: 25px 0;">
+            <!-- TÍTULO -->
+            <div style="
+                background: linear-gradient(135deg, #2E5AAC, #4CAF50);
+                color: white;
+                padding: 25px 20px;
+                border-radius: 20px 20px 0 0;
+                text-align: center;
+            ">
+                <div style="font-size: 2em; margin-bottom: 10px;">🎯</div>
+                <div style="font-size: 1.4em; font-weight: 800;">RECOMENDAÇÕES DO DIA</div>
+                <div style="opacity: 0.9; margin-top: 5px;">
+                    ${new Date().toLocaleDateString('pt-BR')}
+                </div>
+            </div>
+            
+            <!-- PARA COMPRAR -->
+            <div style="padding: 25px 20px; background: white; border-bottom: 1px solid #eee;">
+                <div style="
+                    color: #4CAF50;
+                    font-weight: 800;
+                    font-size: 1.2em;
+                    margin-bottom: 20px;
+                    display: flex;
+                    align-items: center;
+                    gap: 10px;
+                ">
+                    <span>🟢</span>
+                    <span>TOP 3 PARA COMPRAR</span>
+                </div>
+                
+                ${comprar.map((empresa, index) => `
+                    <div style="
+                        background: #f8f9fa;
+                        padding: 20px;
+                        border-radius: 16px;
+                        margin-bottom: 15px;
+                        border-left: 5px solid #4CAF50;
+                    ">
+                        <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+                            <div>
+                                <div style="font-size: 1.1em; font-weight: 700; color: #333;">
+                                    ${empresa.ticker}
+                                </div>
+                                <div style="color: #666; font-size: 0.95em; margin-top: 5px;">
+                                    ${empresa.nome}
+                                </div>
+                            </div>
+                            <div style="
+                                background: #4CAF50;
+                                color: white;
+                                padding: 10px 15px;
+                                border-radius: 12px;
+                                font-weight: 800;
+                                font-size: 1.1em;
+                            ">
+                                ${empresa.score}
+                            </div>
+                        </div>
+                        
+                        <div style="
+                            display: grid;
+                            grid-template-columns: repeat(2, 1fr);
+                            gap: 10px;
+                            margin-top: 15px;
+                        ">
+                            <div style="text-align: center;">
+                                <div style="font-size: 0.85em; color: #666;">P/L</div>
+                                <div style="font-size: 1.2em; font-weight: 700;">${empresa.indicadores.pl}</div>
+                            </div>
+                            <div style="text-align: center;">
+                                <div style="font-size: 0.85em; color: #666;">ROE</div>
+                                <div style="font-size: 1.2em; font-weight: 700;">${empresa.indicadores.roe}%</div>
+                            </div>
+                        </div>
+                        
+                        <div style="
+                            margin-top: 15px;
+                            padding: 12px;
+                            background: #e8f5e9;
+                            border-radius: 10px;
+                            font-size: 0.9em;
+                            color: #2e7d32;
+                        ">
+                            📌 ${empresa.motivo}
+                        </div>
+                        
+                        <button onclick="analisarAcaoMock('${empresa.ticker}')" style="
+                            width: 100%;
+                            padding: 14px;
+                            background: #4CAF50;
+                            color: white;
+                            border: none;
+                            border-radius: 12px;
+                            font-weight: 700;
+                            margin-top: 15px;
+                            cursor: pointer;
+                        ">
+                            🔍 Analisar ${empresa.ticker}
+                        </button>
+                    </div>
+                `).join('')}
+            </div>
+            
+            <!-- PARA VENDER -->
+            <div style="padding: 25px 20px; background: white; border-radius: 0 0 20px 20px;">
+                <div style="
+                    color: #F44336;
+                    font-weight: 800;
+                    font-size: 1.2em;
+                    margin-bottom: 20px;
+                    display: flex;
+                    align-items: center;
+                    gap: 10px;
+                ">
+                    <span>🔴</span>
+                    <span>TOP 3 PARA VENDER</span>
+                </div>
+                
+                ${vender.map((empresa, index) => `
+                    <div style="
+                        background: #f8f9fa;
+                        padding: 20px;
+                        border-radius: 16px;
+                        margin-bottom: 15px;
+                        border-left: 5px solid #F44336;
+                    ">
+                        <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+                            <div>
+                                <div style="font-size: 1.1em; font-weight: 700; color: #333;">
+                                    ${empresa.ticker}
+                                </div>
+                                <div style="color: #666; font-size: 0.95em; margin-top: 5px;">
+                                    ${empresa.nome}
+                                </div>
+                            </div>
+                            <div style="
+                                background: #F44336;
+                                color: white;
+                                padding: 10px 15px;
+                                border-radius: 12px;
+                                font-weight: 800;
+                                font-size: 1.1em;
+                            ">
+                                ${empresa.score}
+                            </div>
+                        </div>
+                        
+                        <div style="
+                            display: grid;
+                            grid-template-columns: repeat(2, 1fr);
+                            gap: 10px;
+                            margin-top: 15px;
+                        ">
+                            <div style="text-align: center;">
+                                <div style="font-size: 0.85em; color: #666;">P/L</div>
+                                <div style="font-size: 1.2em; font-weight: 700;">${empresa.indicadores.pl}</div>
+                            </div>
+                            <div style="text-align: center;">
+                                <div style="font-size: 0.85em; color: #666;">ROE</div>
+                                <div style="font-size: 1.2em; font-weight: 700;">${empresa.indicadores.roe}%</div>
+                            </div>
+                        </div>
+                        
+                        <div style="
+                            margin-top: 15px;
+                            padding: 12px;
+                            background: #ffebee;
+                            border-radius: 10px;
+                            font-size: 0.9em;
+                            color: #c62828;
+                        ">
+                            ⚠️ ${empresa.motivo}
+                        </div>
+                        
+                        <button onclick="analisarAcaoMock('${empresa.ticker}')" style="
+                            width: 100%;
+                            padding: 14px;
+                            background: #F44336;
+                            color: white;
+                            border: none;
+                            border-radius: 12px;
+                            font-weight: 700;
+                            margin-top: 15px;
+                            cursor: pointer;
+                        ">
+                            🔍 Analisar ${empresa.ticker}
+                        </button>
+                    </div>
+                `).join('')}
+            </div>
+        </div>
+    `;
+}
+
+// Função auxiliar para analisar ticker das recomendações
+function analisarAcaoMock(ticker) {
+    document.getElementById('inputTicker').value = ticker;
+    analisarAcao({ preventDefault: () => {}, stopPropagation: () => {} });
 }
 
 // (Opcional) Pode testar a conexão automaticamente ao carregar a página
